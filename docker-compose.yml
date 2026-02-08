@@ -33,10 +33,10 @@ services:
       # - ${WIREGUARD_CONFIG_PATH}:/gluetun/wireguard/wg0.conf
     ports:
       - 8888:8888/tcp # HTTP proxy
-      - ${RADAAR_PORT}:${RADAAR_PORT} # Example port for app behind VPN
-      - ${RADAAR_SSL_PORT}:${RADAAR_SSL_PORT}
-      - ${BUILDAAR_PORT}:${BUILDAAR_PORT}
-      - ${SONAAR_PORT}:${SONAAR_PORT}
+      - ${RADARR_PORT}:${RADARR_PORT} # Example port for app behind VPN
+      - ${RADARR_SSL_PORT}:${RADARR_SSL_PORT}
+      - ${BUILDARR_PORT}:${BUILDARR_PORT}
+      - ${SONARR_PORT}:${SONARR_PORT}
       - ${QBIT_PORT}:${QBIT_PORT}
       - ${QBIT_LISTEN_PORT}:${QBIT_LISTEN_PORT}
       - ${QBIT_LISTEN_PORT}:${QBIT_LISTEN_PORT}/udp
@@ -81,7 +81,7 @@ services:
       - PGID=3000
       - TZ=Etc/UTC
     volumes:
-      - ${RADAAR_CONFIG_PATH}:/config
+      - ${RADARR_CONFIG_PATH}:/config
       - ${MOVIES_PATH}:/movies #optional
       - ${DOWNLOADS_PATH}:/downloads #optional
     restart: unless-stopped
@@ -117,7 +117,7 @@ services:
     volumes:
       - ${TRANSMISSION_CONFIG_PATH}:/config # Configuration files go here
       - ${DOWNLOADS_PATH}:/downloads # Main downloads folder, shared with *Arr apps
-      - ${RADAAR_PATH}/watch:/watch
+      - ${RADARR_PATH}/watch:/watch
       # - ./watch:/watch # Optional: Folder to automatically add torrents from
     depends_on:
       gluetun-sidecar:
@@ -134,7 +134,7 @@ services:
         - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
         - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
         - RADARR_API_KEY=${RADARR_API_KEY} 
-        - RADAAR_PORT=${RADAAR_PORT}
+        - RADARR_PORT=${RADARR_PORT}
       volumes:
         - ./buildarr:/config
       depends_on:

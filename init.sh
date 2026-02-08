@@ -13,30 +13,30 @@ export PROTON_PASSWORD="7LBrH7tbDhM6!EJ9"
 export GLUETUN_PATH="$HOME/gluetun"
 export GLUETUN_CONFIG_PATH="$GLUETUN_PATH/config"
 
-# buildaar configs
-export BUILDAAR_PORT="7877"
-export BUILDAAR_PATH="$HOME/buildaar"
-export BUILDAAR_CONFIG_PATH="$BUILDAAR_PATH/config"
+# buildarr configs
+export BUILDARR_PORT="7877"
+export BUILDARR_PATH="$HOME/buildarr"
+export BUILDARR_CONFIG_PATH="$BUILDARR_PATH/config"
 
-# radaar configs
-export RADAAR_PORT="7878"
-export RADAAR_SSL_PORT="9898" # unused currently
-export RADAAR_PATH="$HOME/radaar"
-export RADAAR_CONFIG_PATH="$RADAAR_PATH/config"
+# radarr configs
+export RADARR_PORT="7878"
+export RADARR_SSL_PORT="9898" # unused currently
+export RADARR_PATH="$HOME/radarr"
+export RADARR_CONFIG_PATH="$RADARR_PATH/config"
 # Define your desired 32-character hex key
 export RADARR_API_KEY=8B29563564C3D597018A1003B57C1B9C
 # Ensure the config directory exists
-mkdir -p "$RADAAR_CONFIG_PATH"
+mkdir -p "$RADARR_CONFIG_PATH"
 # Create the config.xml if it doesn't exist
-if [ ! -f "$RADAAR_CONFIG_PATH/config.xml" ]; then
-    cat <<EOF > "$RADAAR_CONFIG_PATH/config.xml"
+if [ ! -f "$RADARR_CONFIG_PATH/config.xml" ]; then
+    cat <<EOF > "$RADARR_CONFIG_PATH/config.xml"
 <Config>
   <ApiKey>${RADARR_API_KEY}</ApiKey>
   <AuthenticationMethod>None</AuthenticationMethod>
-  <Port>${RADAAR_PORT}</Port>
+  <Port>${RADARR_PORT}</Port>
   <UrlBase></UrlBase>
   <BindAddress>*</BindAddress>
-  <SslPort>${RADAAR_SSL_PORT}</SslPort>
+  <SslPort>${RADARR_SSL_PORT}</SslPort>
   <EnableSsl>False</EnableSsl>
 </Config>
 EOF
@@ -52,7 +52,7 @@ export TRANSMISSION_USERNAME="admin"
 export TRANSMISSION_PASSWORD="1jij213o1u891729jlajdldhwuajdwhajk"
 
 # other ports
-export SONAAR_PORT="8989"
+export SONARR_PORT="8989"
 export QBIT_PORT="8080"
 export QBIT_LISTEN_PORT="6881"
 export TORRENT_PORT="51413"
@@ -63,12 +63,12 @@ export SOULSEEK_OBFUSCATED_PORT="2235"
 export WIREGUARD_FIREWALL_PORTS="${TORRENT_PORT},${SOULSEEK_LISTEN_PORT},${SOULSEEK_OBFUSCATED_PORT},${TRANSMISSION_PEER_PORT}"
 
 # initialize paths & perms to PID
-for p in ${GLUETUN_CONFIG_PATH} ${RADAAR_CONFIG_PATH} ${RADAAR_MOVIES_PATH} ${RADAAR_DOWNLOADS_PATH} ${TRANSMISSION_CONFIG_PATH};  do
+for p in ${GLUETUN_CONFIG_PATH} ${RADARR_CONFIG_PATH} ${RADARR_MOVIES_PATH} ${RADARR_DOWNLOADS_PATH} ${TRANSMISSION_CONFIG_PATH};  do
     mkdir -p ${p} && sudo chown -R ${PUID}:${PGID} ${p}
 done
 # Set permissions using the variables (Portable)
 # We use $(id -gn) to get the group name dynamically instead of hardcoding 'staff'
-sudo chown -R "${PUID}:${PGID}" "$RADAAR_PATH" "$GLUETUN_PATH"
-sudo chmod -R 775 "$RADAAR_PATH" "$GLUETUN_PATH"
+sudo chown -R "${PUID}:${PGID}" "$RADARR_PATH" "$GLUETUN_PATH"
+sudo chmod -R 775 "$RADARR_PATH" "$GLUETUN_PATH"
 
 docker-compose up
