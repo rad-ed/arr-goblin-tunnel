@@ -6,6 +6,8 @@ radarr:
   port: 7878
   api_key: "8B29563564C3D597018A1003B57C1B9C"
   settings:
+    media_management:
+      colon_replacement_format: "spaceDash" 
     indexers:
       - name: "Prowlarr"
         implementation: "Torznab"

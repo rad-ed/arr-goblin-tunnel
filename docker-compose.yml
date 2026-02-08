@@ -77,6 +77,12 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${RADARR_PORT}/api/v3/system/status?apikey=${RADARR_API_KEY}"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
     environment:
       - PUID=${PUID}
       - PGID=3000
@@ -97,6 +103,13 @@ services:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     network_mode: "service:gluetun-sidecar"
+    healthcheck:
+      # We use the system status API to verify the app is fully booted
+      test: ["CMD", "curl", "-f", "http://localhost:${PROWLARR_PORT}/api/v3/system/status?apikey=${PROWLARR_API_KEY}"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -195,7 +208,9 @@ services:
       volumes:
         - ./buildarr:/config
       depends_on:
+        prowlarr:
+          condition: service_healthy
         radarr:
-          condition: service_started 
+          condition: service_healthy
         transmission:
-          condition: service_started
+          condition: service_started # still hack fix- suitable?
