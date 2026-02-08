@@ -6,6 +6,13 @@ radarr:
   port: 7878
   api_key: "8B29563564C3D597018A1003B57C1B9C"
   settings:
+    indexers:
+      - name: "Prowlarr"
+        implementation: "Torznab"
+        config:
+          # This tells Radarr to use Prowlarr as its source
+          url: "http://localhost:9696/api/v3"
+          api_key: 4A4952C7D75CFDDF0D1AEB1363EE461E
     download_clients:
       - name: "Transmission-VPN"
         enable: true

@@ -48,6 +48,26 @@ fi
 # prowlarr configs
 export PROWLARR_PATH="$HOME/prowlarr"
 export PROWLARR_CONFIG_PATH="${PROWLARR_PATH}/config"
+export PROWLARR_API_KEY="4A4952C7D75CFDDF0D1AEB1363EE461E"
+mkdir -p "$PROWLARR_CONFIG_PATH"
+if [ ! -f "$PROWLARR_CONFIG_PATH/config.xml" ]; then
+    echo "Seeding Prowlarr config with API Key..."
+    cat <<EOF > "$PROWLARR_CONFIG_PATH/config.xml"
+<Config>
+  <ApiKey>${PROWLARR_API_KEY}</ApiKey>
+  <AuthenticationMethod>None</AuthenticationMethod>
+  <Port>9696</Port>
+  <UrlBase></UrlBase>
+  <BindAddress>*</BindAddress>
+  <SslPort>9697</SslPort>
+  <EnableSsl>False</EnableSsl>
+</Config>
+EOF
+fi
+
+# recyclarr configs
+export RECYCLARR_PATH="$HOME/recyclarr"
+export RECYCLARR_CONFIG_PATH="${RECYCLARR_PATH}/config"
 
 # transmission configs
 export TRANSMISSION_PEER_PORT="51413"

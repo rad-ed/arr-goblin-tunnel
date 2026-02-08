@@ -74,40 +74,6 @@ services:
     # #   retries: 3
     # #   start_period: 10s  
 
-  ##
-  # Synchronizes the port 
-  ##
-  # port-sync:
-  #   image: ghcr.io/p-stark/gluetun-transmission-port-update:latest
-  #   container_name: port-sync
-  #   network_mode: "service:gluetun-sidecar"
-  #   environment:
-  #     - TRANSMISSION_HOST=localhost
-  #     - TRANSMISSION_PORT=9091
-  #     - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
-  #     - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
-  #     - GLUETUN_CONTROL_HOST=localhost
-  #     - GLUETUN_CONTROL_PORT=8000
-  #   restart: always
-  #   depends_on:
-  #     - gluetun-sidecar
-  #     - transmission
-
-  prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
-    container_name: prowlarr
-    network_mode: "service:gluetun-sidecar"
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=America/Los_Angeles
-    volumes:
-      - ${PROWLARR_CONFIG_PATH}:/config
-    restart: unless-stopped
-    depends_on:
-      gluetun-sidecar:
-        condition: service_healthy 
-
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
@@ -126,6 +92,62 @@ services:
         condition: service_healthy 
       transmission:
         condition: service_started # hack fix , whatever
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun-sidecar"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Los_Angeles
+    volumes:
+      - ${PROWLARR_CONFIG_PATH}:/config
+    restart: unless-stopped
+    depends_on:
+      gluetun-sidecar:
+        condition: service_healthy 
+
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: "service:gluetun-sidecar"
+    environment:
+      - LOG_LEVEL=info
+      - TZ=America/Los_Angeles
+    restart: unless-stopped
+    depends_on:
+      - gluetun-sidecar
+
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr
+    container_name: recyclarr
+    network_mode: "service:gluetun-sidecar"
+    user: 1000:1000 # Match your PUID:PGID
+    volumes:
+      - ${RECYCLARR_CONFIG_PATH}:/config
+    environment:
+      - TZ=America/Los_Angeles
+    depends_on:
+      - radarr
+      # - sonarr
+
+  # sonarr:
+  #   image: lscr.io/linuxserver/sonarr:latest
+  #   container_name: sonarr
+  #   network_mode: "service:gluetun-sidecar"
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=America/Los_Angeles
+  #   volumes:
+  #     - ${SONARR_CONFIG_PATH}:/config
+  #     - ${TV_PATH}:/tv
+  #     - ${DOWNLOADS_PATH}:/downloads
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - gluetun-sidecar
+  #     - transmission
 
   transmission:
     image: linuxserver/transmission:latest
