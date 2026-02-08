@@ -1,0 +1,44 @@
+services:
+  gluetun-sidecar:
+    image: qmcgaw/gluetun
+    container_name: gluetun-sidecar
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      # https://github.com/qdm12/gluetun/blob/master/Dockerfile
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
+      - FIREWALL_VPN_INPUT_PORTS=${WIREGUARD_FIREWALL_PORTS}
+    volumes:
+      - ${GLUETUN_CONFIG_PATH}:/gluetun
+      - ${WIREGUARD_CONFIG_PATH}:/gluetun/wireguard/wg0.conf:ro
+    ports:
+      - 8888:8888/tcp # HTTP proxy
+      - ${RADAAR_PORT}:${RADAAR_PORT} # Example port for app behind VPN
+      - ${SONAAR_PORT}:${SONAAR_PORT}
+      - ${QBIT_PORT}:${QBIT_PORT}
+      - ${QBIT_LISTEN_PORT}:${QBIT_LISTEN_PORT}
+      - ${QBIT_LISTEN_PORT}:${QBIT_LISTEN_PORT}/udp
+      - ${TORRENT_PORT}:${TORRENT_PORT}
+      - ${SOULSEEK_LISTEN_PORT}:${SOULSEEK_LISTEN_PORT}
+      - ${SOULSEEK_OBFUSCATED_PORT}:${SOULSEEK_OBFUSCATED_PORT}
+    restart: always
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Etc/UTC
+    volumes:
+      - ${RADAAR_CONFIG_PATH}:/config
+      - ${RADAAR_MOVIES_PATH}:/movies #optional
+      - ${RADAAR_DOWNLOADS_PATH}:/downloads #optional
+    restart: unless-stopped
+    network_mode: "container:gluetun-sidecar" # Routes all traffic through sidecar
+    depends_on:
+      - gluetun-sidecar
