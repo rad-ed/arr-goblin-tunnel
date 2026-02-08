@@ -1,27 +1,32 @@
-buildarr:
-  watch_config: true
+# buildarr:
+#   watch_config: true
 
-radarr:
-  hostname: "localhost"
-  port: 7878
-  api_key: "8B29563564C3D597018A1003B57C1B9C"
-  settings:
-    media_management:
-      colon_replacement_format: "spaceDash" 
-    indexers:
-      - name: "Prowlarr"
-        implementation: "Torznab"
-        config:
-          # This tells Radarr to use Prowlarr as its source
-          url: "http://localhost:9696/api/v3"
-          api_key: 4A4952C7D75CFDDF0D1AEB1363EE461E
-    download_clients:
-      - name: "Transmission-VPN"
-        enable: true
-        implementation: "Transmission"
-        config:
-          host: "localhost"
-          port: 9091
-          username: "admin"
-          password: "1jij213o1u891729jlajdldhwuajdwhajk"
-          use_ssl: false
+# prowlarr:
+#   hostname: "localhost"
+#   port: 9696
+#   api_key: "4A4952C7D75CFDDF0D1AEB1363EE461E"
+
+# radarr:
+#   hostname: "localhost"
+#   port: 7878
+#   api_key: "8B29563564C3D597018A1003B57C1B9C"
+#   settings:
+#     media_management:
+#       colon_replacement_format: "spaceDash" 
+#     indexers:
+#       - name: "Prowlarr"
+#         implementation: "Torznab"
+#         config:
+#           # This tells Radarr to use Prowlarr as its source
+#           url: "http://localhost:9696/api/v3"
+#           api_key: "4A4952C7D75CFDDF0D1AEB1363EE461E"
+#     download_clients:
+#       - name: "Transmission-VPN"
+#         enable: true
+#         implementation: "Transmission"
+#         config:
+#           host: "localhost"
+#           port: 9091
+#           username: "admin"
+#           password: "1jij213o1u891729jlajdldhwuajdwhajk"
+#           use_ssl: false

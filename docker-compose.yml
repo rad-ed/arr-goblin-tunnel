@@ -103,17 +103,20 @@ services:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     network_mode: "service:gluetun-sidecar"
-    healthcheck:
-      # We use the system status API to verify the app is fully booted
-      test: ["CMD", "curl", "-f", "http://localhost:${PROWLARR_PORT}/api/v3/system/status?apikey=${PROWLARR_API_KEY}"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
+    # healthcheck:
+    #   # We use the system status API to verify the app is fully booted
+    #   # test: ["CMD-SHELL", "curl -s http://localhost:9696/api/v3/system/status?apikey=4A4952C7D75CFDDF0D1AEB1363EE461E | grep -q 'version'"]
+    #   # test: ["CMD-SHELL", "curl -s http://localhost:${PROWLARR_PORT}/api/v3/system/status?apikey=${PROWLARR_API_KEY} | grep -q 'version'"]
+    #   interval: 20s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 10s
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=America/Los_Angeles
+      - PROWLARR_PORT=${PROWLARR_PORT}
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY}
     volumes:
       - ${PROWLARR_CONFIG_PATH}:/config
     restart: unless-stopped
@@ -194,23 +197,23 @@ services:
         condition: service_healthy 
     restart: unless-stopped
 
-  buildarr:
-      image: callum027/buildarr:latest
-      container_name: buildarr
-      network_mode: "service:gluetun-sidecar"
-      environment:
-        #- PUID=0
-        #- PGID=0
-        - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
-        - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
-        - RADARR_API_KEY=${RADARR_API_KEY} 
-        - RADARR_PORT=${RADARR_PORT}
-      volumes:
-        - ./buildarr:/config
-      depends_on:
-        prowlarr:
-          condition: service_healthy
-        radarr:
-          condition: service_healthy
-        transmission:
-          condition: service_started # still hack fix- suitable?
+  # buildarr:
+  #     image: callum027/buildarr:latest
+  #     container_name: buildarr
+  #     network_mode: "service:gluetun-sidecar"
+  #     environment:
+  #       #- PUID=0
+  #       #- PGID=0
+  #       - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
+  #       - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
+  #       - RADARR_API_KEY=${RADARR_API_KEY} 
+  #       - RADARR_PORT=${RADARR_PORT}
+  #     volumes:
+  #       - ./buildarr:/config
+  #     depends_on:
+  #       prowlarr:
+  #         condition: service_started # hack fix- suitable?
+  #       radarr:
+  #         condition: service_healthy
+  #       transmission:
+  #         condition: service_started # still hack fix- suitable?

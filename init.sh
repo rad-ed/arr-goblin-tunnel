@@ -4,6 +4,7 @@ export PGID=$(id -g)
 export MOVIES_PATH="$HOME/movies"
 export DOWNLOADS_PATH="$HOME/downloads"
 
+
 # gluetun configs
 # export WIREGUARD_CONFIG_PATH="./goblin-tunnel-US-CA-188.conf"
 export OPENVPN_USERNAME="fG2iPUEVCCNKj4nu"
