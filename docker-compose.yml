@@ -21,6 +21,8 @@ services:
     ports:
       - 8888:8888/tcp # HTTP proxy
       - ${RADAAR_PORT}:${RADAAR_PORT} # Example port for app behind VPN
+      - ${RADAAR_SSL_PORT}:${RADAAR_SSL_PORT}
+      - ${BUILDAAR_PORT}:${BUILDAAR_PORT}
       - ${SONAAR_PORT}:${SONAAR_PORT}
       - ${QBIT_PORT}:${QBIT_PORT}
       - ${QBIT_LISTEN_PORT}:${QBIT_LISTEN_PORT}
@@ -28,6 +30,8 @@ services:
       - ${TORRENT_PORT}:${TORRENT_PORT}
       - ${SOULSEEK_LISTEN_PORT}:${SOULSEEK_LISTEN_PORT}
       - ${SOULSEEK_OBFUSCATED_PORT}:${SOULSEEK_OBFUSCATED_PORT}
+      - ${TRANSMISSION_UI_PORT}:${TRANSMISSION_UI_PORT}
+      - ${TRANSMISSION_PEER_PORT}:${TRANSMISSION_PEER_PORT}/udp
     restart: always
 
   radarr:
@@ -35,13 +39,54 @@ services:
     container_name: radarr
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=3000
       - TZ=Etc/UTC
     volumes:
       - ${RADAAR_CONFIG_PATH}:/config
-      - ${RADAAR_MOVIES_PATH}:/movies #optional
-      - ${RADAAR_DOWNLOADS_PATH}:/downloads #optional
+      - ${MOVIES_PATH}:/movies #optional
+      - ${DOWNLOADS_PATH}:/downloads #optional
     restart: unless-stopped
     network_mode: "service:gluetun-sidecar" # Routes all traffic through sidecar
     depends_on:
-      - gluetun-sidecar
+      gluetun-sidecar:
+        condition: service_healthy 
+
+  transmission:
+    image: linuxserver/transmission:latest
+    container_name: transmission
+    network_mode: "service:gluetun-sidecar"
+    environment:
+      - PUID=${PUID} # Replace with your PUID
+      - PGID=${PGID} # Replace with your PGID
+      - TZ=America/Los_Angeles # Replace with your timezone
+      # - TRANSMISSION_WEB_HOME=/
+      - USER=${TRANSMISSION_USERNAME} # Optional: Set a username for the web UI
+      - PASS=${TRANSMISSION_PASSWORD} # Optional: Set a password for the web UI
+      - TRANSMISSION_RPC_WHITELIST_ENABLED=false 
+      - TRANSMISSION_RPC_HOST_WHITELIST_ENABLED=false
+      # - TRANSMISSION_WEB_HOME=/usr/share/transmission/web
+    volumes:
+      - ${TRANSMISSION_CONFIG_PATH}:/config # Configuration files go here
+      - ${DOWNLOADS_PATH}:/downloads # Main downloads folder, shared with *Arr apps
+      - ${RADAAR_PATH}/watch:/watch
+      # - ./watch:/watch # Optional: Folder to automatically add torrents from
+    depends_on:
+      gluetun-sidecar:
+        condition: service_healthy 
+    restart: unless-stopped
+
+  buildarr:
+      image: callum027/buildarr:latest
+      container_name: buildarr
+      network_mode: "service:gluetun-sidecar"
+      environment:
+        #- PUID=0
+        #- PGID=0
+        - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
+        - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
+        - RADARR_API_KEY=${RADARR_API_KEY} 
+        - RADAAR_PORT=${RADAAR_PORT}
+      volumes:
+        - ./buildarr:/config
+      depends_on:
+        - radarr

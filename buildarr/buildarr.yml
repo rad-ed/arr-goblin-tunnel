@@ -1,0 +1,18 @@
+buildarr:
+  watch_config: true
+
+radarr:
+  hostname: "localhost"
+  port: ${RADAAR_PORT}       # No quotes here
+  api_key: "${RADARR_API_KEY}" # Quotes here are fine
+  settings:
+    download_clients:
+      - name: "Transmission-VPN"
+        enable: true
+        implementation: "Transmission"
+        config:
+          host: "localhost"
+          port: ${TRANSMISSION_UI_PORT}
+          username: "${TRANSMISSION_USERNAME}"
+          password: "${TRANSMISSION_PASSWORD}"
+          use_ssl: false
