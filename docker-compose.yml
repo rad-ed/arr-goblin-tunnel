@@ -1,4 +1,8 @@
 services:
+
+  ####
+  # TODO: MIGRATE TO WIREGUARD
+  ####
   gluetun-sidecar:
     image: qmcgaw/gluetun
     container_name: gluetun-sidecar
@@ -9,14 +13,21 @@ services:
     environment:
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
+      - HTTP_CONTROL_SERVER_ADDRESS=:8000
       - OPENVPN_USER=${OPENVPN_USERNAME} # Add +nr to the end for port forwarding
       - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
       # - SERVER_REGIONS=Netherlands # Optional: Choose your region
       # Required if you want the internal server list to update automatically
       - UPDATER_PROTONVPN_USERNAME=${PROTON_USERNAME}
       - UPDATER_PROTONVPN_PASSWORD=${PROTON_PASSWORD}
+      - DNS_ADDRESS=1.1.1.1 # Force use Cloudflare
+      - DNS_KEEP_NAMESERVER=on 
+      - DOT=off             # Disable DNS over TLS (speed boost)
+      - BLOCK_MALICIOUS=off # Stop downloading massive blocklists
+      - PORT_FORWARD_ONLY=on # only connect to servers that will allow port forwarding
     volumes:
       - ${GLUETUN_CONFIG_PATH}:/gluetun
+      - /tmp/gluetun:/tmp/gluetun
       # - ${WIREGUARD_CONFIG_PATH}:/gluetun/wireguard/wg0.conf
     ports:
       - 8888:8888/tcp # HTTP proxy
@@ -33,6 +44,32 @@ services:
       - ${TRANSMISSION_UI_PORT}:${TRANSMISSION_UI_PORT}
       - ${TRANSMISSION_PEER_PORT}:${TRANSMISSION_PEER_PORT}/udp
     restart: always
+    # # healthcheck:
+    # #   test: ["CMD", "client", "status"]
+    # #   interval: 10s
+    # #   timeout: 5s
+    # #   retries: 3
+    # #   start_period: 10s  
+
+  ##
+  # Synchronizes the port 
+  ##
+  # port-sync:
+  #   image: ghcr.io/p-stark/gluetun-transmission-port-update:latest
+  #   container_name: port-sync
+  #   network_mode: "service:gluetun-sidecar"
+  #   environment:
+  #     - TRANSMISSION_HOST=localhost
+  #     - TRANSMISSION_PORT=9091
+  #     - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
+  #     - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
+  #     - GLUETUN_CONTROL_HOST=localhost
+  #     - GLUETUN_CONTROL_PORT=8000
+  #   restart: always
+  #   depends_on:
+  #     - gluetun-sidecar
+  #     - transmission
+
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -64,6 +101,8 @@ services:
       - PASS=${TRANSMISSION_PASSWORD} # Optional: Set a password for the web UI
       - TRANSMISSION_RPC_WHITELIST_ENABLED=false 
       - TRANSMISSION_RPC_HOST_WHITELIST_ENABLED=false
+      - DOCKER_MODS=michaukrieg/docker-mods:transmission-gluetun-port-update
+
       # - TRANSMISSION_WEB_HOME=/usr/share/transmission/web
     volumes:
       - ${TRANSMISSION_CONFIG_PATH}:/config # Configuration files go here
@@ -89,4 +128,7 @@ services:
       volumes:
         - ./buildarr:/config
       depends_on:
-        - radarr
+        radarr:
+          condition: service_started 
+        transmission:
+          condition: service_started

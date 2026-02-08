@@ -24,7 +24,7 @@ export RADAAR_SSL_PORT="9898" # unused currently
 export RADAAR_PATH="$HOME/radaar"
 export RADAAR_CONFIG_PATH="$RADAAR_PATH/config"
 # Define your desired 32-character hex key
-export RADARR_API_KEY="8B29563564C3D597018A1003B57C1B9C"
+export RADARR_API_KEY=8B29563564C3D597018A1003B57C1B9C
 # Ensure the config directory exists
 mkdir -p "$RADAAR_CONFIG_PATH"
 # Create the config.xml if it doesn't exist

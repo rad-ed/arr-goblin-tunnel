@@ -3,8 +3,8 @@ buildarr:
 
 radarr:
   hostname: "localhost"
-  port: ${RADAAR_PORT}       # No quotes here
-  api_key: "${RADARR_API_KEY}" # Quotes here are fine
+  port: 7878
+  api_key: "8B29563564C3D597018A1003B57C1B9C"
   settings:
     download_clients:
       - name: "Transmission-VPN"
@@ -12,7 +12,7 @@ radarr:
         implementation: "Transmission"
         config:
           host: "localhost"
-          port: ${TRANSMISSION_UI_PORT}
-          username: "${TRANSMISSION_USERNAME}"
-          password: "${TRANSMISSION_PASSWORD}"
+          port: 9091
+          username: "admin"
+          password: "1jij213o1u891729jlajdldhwuajdwhajk"
           use_ssl: false
