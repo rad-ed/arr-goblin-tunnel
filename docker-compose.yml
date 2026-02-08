@@ -90,18 +90,18 @@ services:
       gluetun-sidecar:
         condition: service_healthy 
       transmission:
-        condition: service_healthy
+        condition: service_started # hack fix , whatever
 
   transmission:
     image: linuxserver/transmission:latest
     container_name: transmission
     network_mode: "service:gluetun-sidecar"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${TRANSMISSION_UI_PORT}/transmission/web/"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:${TRANSMISSION_UI_PORT}/transmission/web/"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 10s
     environment:
       - PUID=${PUID} # Replace with your PUID
       - PGID=${PGID} # Replace with your PGID
