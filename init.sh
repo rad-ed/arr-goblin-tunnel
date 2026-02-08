@@ -8,6 +8,8 @@ export DOWNLOADS_PATH="$HOME/downloads"
 # export WIREGUARD_CONFIG_PATH="./goblin-tunnel-US-CA-188.conf"
 export OPENVPN_USERNAME="fG2iPUEVCCNKj4nu"
 export OPENVPN_PASSWORD="8dnWOnrE97vRHMShvQl5d5s7PmXhXm6B"
+export WIREGUARD_PRIVATE_KEY="sDxqmMukHbc8pGqxtE4NmllZ6uB7r6uKVOH/+B+KhnQ="
+export WIREGUARD_ADDRESSES="10.2.0.2/32"
 export PROTON_USERNAME="maxwell.cudlitz@gmail.com"
 export PROTON_PASSWORD="7LBrH7tbDhM6!EJ9"
 export GLUETUN_PATH="$HOME/gluetun"
@@ -42,6 +44,10 @@ if [ ! -f "$RADARR_CONFIG_PATH/config.xml" ]; then
 EOF
     echo "Seeded Radarr config with API Key: $RADARR_API_KEY"
 fi
+
+# prowlarr configs
+export PROWLARR_PATH="$HOME/prowlarr"
+export PROWLARR_CONFIG_PATH="${PROWLARR_PATH}/config"
 
 # transmission configs
 export TRANSMISSION_PEER_PORT="51413"
