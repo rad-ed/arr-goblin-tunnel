@@ -63,12 +63,17 @@ export SOULSEEK_OBFUSCATED_PORT="2235"
 export WIREGUARD_FIREWALL_PORTS="${TORRENT_PORT},${SOULSEEK_LISTEN_PORT},${SOULSEEK_OBFUSCATED_PORT},${TRANSMISSION_PEER_PORT}"
 
 # initialize paths & perms to PID
-for p in ${GLUETUN_CONFIG_PATH} ${RADARR_CONFIG_PATH} ${RADARR_MOVIES_PATH} ${RADARR_DOWNLOADS_PATH} ${TRANSMISSION_CONFIG_PATH};  do
+for p in ${RADARR_PATH} ${GLUETUN_PATH} ${DOWNLOADS_PATH} ${GLUETUN_CONFIG_PATH} ${RADARR_CONFIG_PATH} ${RADARR_MOVIES_PATH} ${RADARR_DOWNLOADS_PATH} ${TRANSMISSION_CONFIG_PATH};  do
     mkdir -p ${p} && sudo chown -R ${PUID}:${PGID} ${p}
+    sudo chmod -R 775 ${p}
 done
+
+mkdir -p "${DOWNLOADS_PATH}/complete"
+mkdir -p "${DOWNLOADS_PATH}/incomplete"
+
 # Set permissions using the variables (Portable)
 # We use $(id -gn) to get the group name dynamically instead of hardcoding 'staff'
-sudo chown -R "${PUID}:${PGID}" "$RADARR_PATH" "$GLUETUN_PATH"
-sudo chmod -R 775 "$RADARR_PATH" "$GLUETUN_PATH"
+# sudo chown -R "${PUID}:${PGID}" "$RADARR_PATH" "$GLUETUN_PATH"
+# sudo chmod -R 775 "$RADARR_PATH" "$GLUETUN_PATH"
 
 docker-compose up
