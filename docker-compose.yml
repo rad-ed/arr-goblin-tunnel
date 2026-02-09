@@ -26,6 +26,13 @@ services:
 
       - VPN_PORT_FORWARDING=on  
       - PORT_FORWARD_ONLY=on 
+
+      # Allow the Docker internal network to talk to itself
+      # Add this to allow containers to talk to each other on the loopback
+      - FIREWALL_OUTBOUND_SUBNETS=127.0.0.1/32,172.16.0.0/12,192.168.0.0/16
+
+      # Explicitly allow the loopback for cross-container talk
+      - FIREWALL_VPN_INPUT_PORTS=9091,7878 
     #   - VPN_SERVICE_PROVIDER=protonvpn
     #   - VPN_INTERFACE_MTU=1300 # prevents issues on OSX
     #   - HTTP_CONTROL_SERVER_ADDRESS=:8000
@@ -57,6 +64,7 @@ services:
       - ${RADARR_PORT}:${RADARR_PORT} # Example port for app behind VPN
       - ${RADARR_SSL_PORT}:${RADARR_SSL_PORT}
       - ${BUILDARR_PORT}:${BUILDARR_PORT}
+      - ${PROWLARR_PORT}:${PROWLARR_PORT}
       - ${SONARR_PORT}:${SONARR_PORT}
       - ${QBIT_PORT}:${QBIT_PORT}
       - ${QBIT_LISTEN_PORT}:${QBIT_LISTEN_PORT}
@@ -103,17 +111,20 @@ services:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     network_mode: "service:gluetun-sidecar"
-    healthcheck:
-      # We use the system status API to verify the app is fully booted
-      test: ["CMD", "curl", "-f", "http://localhost:${PROWLARR_PORT}/api/v3/system/status?apikey=${PROWLARR_API_KEY}"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
+    # healthcheck:
+    #   # We use the system status API to verify the app is fully booted
+    #   # test: ["CMD-SHELL", "curl -s http://localhost:9696/api/v3/system/status?apikey=4A4952C7D75CFDDF0D1AEB1363EE461E | grep -q 'version'"]
+    #   # test: ["CMD-SHELL", "curl -s http://localhost:${PROWLARR_PORT}/api/v3/system/status?apikey=${PROWLARR_API_KEY} | grep -q 'version'"]
+    #   interval: 20s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 10s
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=America/Los_Angeles
+      - PROWLARR_PORT=${PROWLARR_PORT}
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY}
     volumes:
       - ${PROWLARR_CONFIG_PATH}:/config
     restart: unless-stopped
@@ -133,17 +144,18 @@ services:
       - gluetun-sidecar
 
   recyclarr:
-    image: ghcr.io/recyclarr/recyclarr
+    image: ghcr.io/recyclarr/recyclarr:latest
     container_name: recyclarr
     network_mode: "service:gluetun-sidecar"
-    user: 1000:1000 # Match your PUID:PGID
+    # Remove 'user: 1000:1000' for macOS; use env vars instead
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Los_Angeles
     volumes:
       - ${RECYCLARR_CONFIG_PATH}:/config
-    environment:
-      - TZ=America/Los_Angeles
     depends_on:
       - radarr
-      # - sonarr
 
   # sonarr:
   #   image: lscr.io/linuxserver/sonarr:latest
@@ -182,6 +194,8 @@ services:
       - TRANSMISSION_RPC_WHITELIST_ENABLED=false 
       - TRANSMISSION_RPC_HOST_WHITELIST_ENABLED=false
       - DOCKER_MODS=michaukrieg/docker-mods:transmission-gluetun-port-update
+      # In Transmission environment variables
+      - TRANSMISSION_RPC_BIND_ADDRESS=0.0.0.0
 
       # - TRANSMISSION_WEB_HOME=/usr/share/transmission/web
     volumes:
@@ -194,23 +208,23 @@ services:
         condition: service_healthy 
     restart: unless-stopped
 
-  buildarr:
-      image: callum027/buildarr:latest
-      container_name: buildarr
-      network_mode: "service:gluetun-sidecar"
-      environment:
-        #- PUID=0
-        #- PGID=0
-        - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
-        - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
-        - RADARR_API_KEY=${RADARR_API_KEY} 
-        - RADARR_PORT=${RADARR_PORT}
-      volumes:
-        - ./buildarr:/config
-      depends_on:
-        prowlarr:
-          condition: service_healthy
-        radarr:
-          condition: service_healthy
-        transmission:
-          condition: service_started # still hack fix- suitable?
+  # buildarr:
+  #     image: callum027/buildarr:latest
+  #     container_name: buildarr
+  #     network_mode: "service:gluetun-sidecar"
+  #     environment:
+  #       #- PUID=0
+  #       #- PGID=0
+  #       - TRANSMISSION_USERNAME=${TRANSMISSION_USERNAME}
+  #       - TRANSMISSION_PASSWORD=${TRANSMISSION_PASSWORD}
+  #       - RADARR_API_KEY=${RADARR_API_KEY} 
+  #       - RADARR_PORT=${RADARR_PORT}
+  #     volumes:
+  #       - ./buildarr:/config
+  #     depends_on:
+  #       prowlarr:
+  #         condition: service_started # hack fix- suitable?
+  #       radarr:
+  #         condition: service_healthy
+  #       transmission:
+  #         condition: service_started # still hack fix- suitable?

@@ -4,6 +4,7 @@ export PGID=$(id -g)
 export MOVIES_PATH="$HOME/movies"
 export DOWNLOADS_PATH="$HOME/downloads"
 
+
 # gluetun configs
 # export WIREGUARD_CONFIG_PATH="./goblin-tunnel-US-CA-188.conf"
 export OPENVPN_USERNAME="fG2iPUEVCCNKj4nu"
@@ -69,6 +70,14 @@ fi
 # recyclarr configs
 export RECYCLARR_PATH="$HOME/recyclarr"
 export RECYCLARR_CONFIG_PATH="${RECYCLARR_PATH}/config"
+mkdir -p "$RECYCLARR_CONFIG_PATH"
+# Copy your master config from the buildarr folder to the Recyclarr folder
+# Ensure the source file exists before trying to copy
+if [ -f "./recyclarr/recyclarr.yml" ]; then
+    cp "./recyclarr/recyclarr.yml" "$RECYCLARR_CONFIG_PATH/recyclarr.yml"
+fi
+# Ensure permissions are correct
+sudo chown -R $(id -u):$(id -g) "$HOME/recyclarr"
 
 # transmission configs
 export TRANSMISSION_PEER_PORT="51413"
@@ -95,6 +104,7 @@ for p in ${RADARR_PATH} ${GLUETUN_PATH} ${DOWNLOADS_PATH} ${GLUETUN_CONFIG_PATH}
     sudo chmod -R 775 ${p}
 done
 
+mkdir -p "${DOWNLOADS_PATH}/complete/radarr"
 mkdir -p "${DOWNLOADS_PATH}/complete"
 mkdir -p "${DOWNLOADS_PATH}/incomplete"
 
