@@ -26,6 +26,13 @@ services:
 
       - VPN_PORT_FORWARDING=on  
       - PORT_FORWARD_ONLY=on 
+
+      # Allow the Docker internal network to talk to itself
+      # Add this to allow containers to talk to each other on the loopback
+      - FIREWALL_OUTBOUND_SUBNETS=127.0.0.1/32,172.16.0.0/12,192.168.0.0/16
+
+      # Explicitly allow the loopback for cross-container talk
+      - FIREWALL_VPN_INPUT_PORTS=9091,7878 
     #   - VPN_SERVICE_PROVIDER=protonvpn
     #   - VPN_INTERFACE_MTU=1300 # prevents issues on OSX
     #   - HTTP_CONTROL_SERVER_ADDRESS=:8000
@@ -57,6 +64,7 @@ services:
       - ${RADARR_PORT}:${RADARR_PORT} # Example port for app behind VPN
       - ${RADARR_SSL_PORT}:${RADARR_SSL_PORT}
       - ${BUILDARR_PORT}:${BUILDARR_PORT}
+      - ${PROWLARR_PORT}:${PROWLARR_PORT}
       - ${SONARR_PORT}:${SONARR_PORT}
       - ${QBIT_PORT}:${QBIT_PORT}
       - ${QBIT_LISTEN_PORT}:${QBIT_LISTEN_PORT}
@@ -136,17 +144,18 @@ services:
       - gluetun-sidecar
 
   recyclarr:
-    image: ghcr.io/recyclarr/recyclarr
+    image: ghcr.io/recyclarr/recyclarr:latest
     container_name: recyclarr
     network_mode: "service:gluetun-sidecar"
-    user: 1000:1000 # Match your PUID:PGID
+    # Remove 'user: 1000:1000' for macOS; use env vars instead
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Los_Angeles
     volumes:
       - ${RECYCLARR_CONFIG_PATH}:/config
-    environment:
-      - TZ=America/Los_Angeles
     depends_on:
       - radarr
-      # - sonarr
 
   # sonarr:
   #   image: lscr.io/linuxserver/sonarr:latest
@@ -185,6 +194,8 @@ services:
       - TRANSMISSION_RPC_WHITELIST_ENABLED=false 
       - TRANSMISSION_RPC_HOST_WHITELIST_ENABLED=false
       - DOCKER_MODS=michaukrieg/docker-mods:transmission-gluetun-port-update
+      # In Transmission environment variables
+      - TRANSMISSION_RPC_BIND_ADDRESS=0.0.0.0
 
       # - TRANSMISSION_WEB_HOME=/usr/share/transmission/web
     volumes:

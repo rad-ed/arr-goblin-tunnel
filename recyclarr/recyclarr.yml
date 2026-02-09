@@ -1,0 +1,12 @@
+radarr:
+  movies:
+    base_url: http://localhost:7878
+    api_key: 8B29563564C3D597018A1003B57C1B9C
+    
+    include:
+      # Sets the Min/Max file sizes (Bitrates)
+      - template: radarr-quality-definition-movie
+      
+      # Sets the Quality Profile (HD Bluray + WEB)
+      # Note: Removed "v3" as per recent deprecation
+      - template: radarr-quality-profile-hd-bluray-web
